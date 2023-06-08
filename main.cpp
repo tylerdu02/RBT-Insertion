@@ -32,8 +32,8 @@ struct Node {
 void insert(Node* &root, Node* current);
 void RBTInsert(Node* current, Node* &root);
 void print(Node* root, int numTabs);
-void rotateLeft(Node* current, Node* &root);
-void rotateRight(Node* current, Node* &root);
+void leftRotate(Node* current, Node* &root);
+void rightRotate(Node* current, Node* &root);
 void search(Node* root, int value);
 Node* getParent(Node* current);
 Node* getGrandparent(Node* current);
@@ -92,5 +92,86 @@ int main() {
          else {
             cout << "Number not found" << endl;
         }
+    }
+}
+
+void RBTInsert(Node* current, Node* &root) { // insertion part
+    if (getParent(current) == NULL) { 
+        current->isRed = false;
+    }
+    else if (color(getParent(current)) == false) { // black
+        return;
+    }
+    else if (color(getUncle(current)) == true) { // red
+        getParent(current)->isRed = false;
+        getUncle(current)->isRed = false;
+        getGrandparent(current)->isRed = true;
+        RBTInsert(getGrandparent(current), root);
+    }
+    else { 
+        Node* parent = getParent(current);
+        Node* grandparent = getGrandparent(current);
+
+        if (current == parent->right && parent == grandparent->left) { 
+            leftRotate(parent, root);
+            current = current->left;
+        }
+        else if (current == parent->left && parent == grandparent->right) { 
+            rightRotate(parent, root);
+            current = current->right;
+        }
+
+        parent = getParent(current);
+        grandparent = getGrandparent(current);
+
+        if (current == parent->left) { 
+            rightRotate(grandparent, root);
+        }
+        else { 
+            leftRotate(grandparent, root);
+        }
+        parent->isRed = false;
+        grandparent->isRed = true;
+    }
+}
+
+void print(Node* root, int numTabs) { // prints 
+    if (root == NULL) { 
+        return;
+    }
+    numTabs += 10;
+
+    print(root->right, numTabs); 
+    cout << endl;
+    for (int i = 10; i < numTabs; i++) { 
+        cout << " ";
+    }
+    cout << root->data;
+    if (root->isRed == true) { // prints the color 
+        cout << " (Red)" << endl;
+    }
+    else { 
+        cout << " (Black)" << endl;
+    }
+    cout << endl;
+    print(root->left, numTabs); 
+}
+
+void search(Node* root, int value) { // searches 
+    if (root == NULL) { 
+        cout << "Invalid input. Try again." << endl;
+        return;
+    }
+    else if (value < root->data) { // less than 
+        search(root->left, value);
+    }
+    else if (value > root->data) { // greater than 
+        search(root->right, value);
+    }
+    else if (value == root->data) { // equal 
+        cout << "Number found: " << value << endl;
+    }
+    else { 
+        cout << "Invalid input. Try again." << endl;
     }
 }
