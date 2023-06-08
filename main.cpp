@@ -11,7 +11,6 @@
 #include <string.h>
 #include <fstream>
 #include <cstring>
-
 using namespace std;
 
 struct Node {
@@ -63,19 +62,12 @@ int main() {
                 RBTInsert(current, root);
             }
             else { 
-                cout << "Invalid input" << endl;
+                cout << "Invalid input. Try again." << endl;
             }
         }
         else if (input[0] == 'P' || input[0] == 'p') { // prints 
             print(root, 0);
             cout << endl;
-        }
-        else if (input[0] == 'S' || input[0] == 's') { // searches
-            int searchNum;
-            cout << "What number would you like to search?" << endl;
-            cin >> searchNum;
-            cin.ignore(1, '\n');
-            search(root, searchNum);
         }
         else if (input[0] == 'F' || input[0] == 'f') { // generates numbers from numbers.txt
             cout << "Numbers from tree have been generated into tree" << endl;
@@ -89,8 +81,79 @@ int main() {
             }
             numbers.close();
         }
-         else {
-            cout << "Number not found" << endl;
+        else if (input[0] == 'S' || input[0] == 's') { // searches
+            int searchNum;
+            cout << "What number would you like to search?" << endl;
+            cin >> searchNum;
+            cin.ignore(1, '\n');
+            search(root, searchNum);
+        }
+        else {
+            cout << "Invalid input. Try again." << endl;
+        }
+    }
+}
+
+Node* getParent(Node* current) { // returns the parent of the node
+    return current->parent;
+}
+
+Node* getGrandparent(Node* current) { // returns the grandparent of the node
+    return getParent(getParent(current));
+}
+
+Node* getSibling(Node* current) { // returns the sibling of the node
+    Node* parent = getParent(current);
+    if (parent == NULL) { 
+        return NULL;
+    }
+    if (current == parent->left) { // left child
+        return parent->right;
+    }
+    else { // right child
+        return parent->left;
+    }
+}
+
+Node* getUncle(Node* current) { // returns the uncle of the node
+    Node* parent = getParent(current);
+    Node* grandparent = getGrandparent(current);
+    if (grandparent == NULL) { 
+        return NULL;
+    }
+    return getSibling(parent);
+}
+
+bool color(Node* current) { // gets color (red or black)
+    if (current == NULL) {
+        return false;
+    }
+    return current->isRed;
+}
+
+void insert(Node* &root, Node* current) { // inserts node 
+    if (root == NULL) { 
+        root = current;
+        root->isRed = false;
+    }
+    else { 
+        if (current->data < root->data) { 
+            if (root->left == NULL) { 
+                root->left = current;
+                current->parent = root;
+            }
+            else { 
+                insert(root->left, current);
+            }
+        }
+        else { // if greater
+            if (root->right == NULL) { 
+                root->right = current;
+                current->parent = root;
+            }
+            else { 
+                insert(root->right, current);
+            }
         }
     }
 }
@@ -174,4 +237,54 @@ void search(Node* root, int value) { // searches
     else { 
         cout << "Invalid input. Try again." << endl;
     }
+}
+// https://www.programiz.com/dsa/red-black-tree
+void leftRotate(Node* current, Node* &root) { // rotate
+    cout << "Left rotate" << endl;
+    Node* currentRight = current->right;
+    current->right = currentRight->left;
+    if (currentRight->left != NULL) { 
+        cout << "Node is not null" << endl;
+        currentRight->left->parent = current;
+    }
+    currentRight->left = current;
+    currentRight->parent = current->parent;
+    if (current->parent == NULL) { 
+        root = currentRight;
+        cout << "Node is the root" << endl;
+    }
+    else if (current == current->parent->left) { 
+        current->parent->left = currentRight;
+        cout << "Node is left child of parent" << endl;
+    }
+    else { 
+        current->parent->right = currentRight;
+        cout << "Node is right child of parent" << endl;
+    } 
+    current->parent = currentRight;
+}
+
+void rightRotate(Node* current, Node* &root) { // rotate
+    cout << "Right rotate" << endl;
+    Node* currentLeft = current->left;
+    current->left = currentLeft->right;
+    if (currentLeft->right != NULL) { 
+        cout << "Node is not null" << endl;
+        currentLeft->right->parent = current;
+    }
+    currentLeft->right = current;
+    currentLeft->parent = current->parent;
+    if (current->parent == NULL) { 
+        cout << "Node is the root" << endl;
+        root = currentLeft;
+    }
+    else if (current == current->parent->left) { 
+        cout << "Node is left child of parent" << endl;
+        current->parent->left = currentLeft;
+    }
+    else { 
+        cout << "Node is right child of parent" << endl;
+        current->parent->right = currentLeft;
+    }
+    current->parent = currentLeft;
 }
